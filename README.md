@@ -30,61 +30,6 @@ Printed parts: [cad/README.md](cad/README.md). Assembly: [docs/assembly.md](docs
 Servos get their own supply with a common ground. Do not run them from the Mega
 or the Pi.
 
-## Build and flash
-
-```bash
-cd firmware
-pio run -e mega -t upload
-pio device monitor
-```
-
-Before first use set the servo travel for each finger and look at your sensor
-readings (see [docs/tuning.md](docs/tuning.md)). The defaults are deliberately
-conservative guesses, not tested values.
-
-## Python (on the Pi or a PC)
-
-```bash
-cd software
-pip install -e .[plot]
-
-python examples/grasp_demo.py /dev/ttyACM0       # COM3 on Windows
-python examples/live_plot.py  /dev/ttyACM0
-python examples/logger.py     /dev/ttyACM0 -t 20
-python examples/calibrate.py  /dev/ttyACM0 index
-```
-
-Pi-specific setup: [docs/raspberry_pi.md](docs/raspberry_pi.md).
-
-```python
-from tactilehand import Hand
-
-with Hand("/dev/ttyACM0") as hand:
-    hand.zero_tactile()
-    hand.set_press_limit(8)
-    hand.grasp()
-```
-
-## Serial protocol
-
-115200 baud, newline-terminated ASCII, commands are case-insensitive.
-
-| Command | Meaning |
-|---------|---------|
-| `P p0 p1 p2 p3 p4` | Target position per finger, 0 (open) to 100 (closed) |
-| `F i pct` | Target for a single finger |
-| `OPEN` / `GRASP` | All fingers to 0 / 100 (press-limited) |
-| `LIM n` | Press limit, ADC counts above baseline |
-| `ZERO` | Re-zero hall baselines (nothing touching the fingertips) |
-| `STREAM 0\|1` | Telemetry on/off |
-
-Replies are `OK` or `ERR <reason>`. Telemetry at 25 Hz:
-
-```
-T,<ms>,<pos x5>,<press x5>,<contact bitmask>
-```
-
-Finger order: thumb, index, middle, ring, pinky.
 
 ## Build log
 
@@ -93,6 +38,17 @@ Write this in your own words, with photos.
 ### Printing
 <!-- what you printed, settings, problems -->
 ![](docs/images/printing_01.jpg)
+
+Parts used (i2 hand, one hand)
+i2_CoverFingerV3, i2_FingersMoldX5V3, i2_FingersTipX5V2, i2_FingersX5V1, i2_HandCoverV1, i2_PalmCoverV2, i2_PulleyX5V1, i2_WristGearV1, i2_WristLargeV2
+
+Print settings i used
+Fill in what you actually used (InMoov suggests 0.25 mm max layer height, 30% infill, 2 mm walls, supports only on the cover / tip parts):
+
+Printer: Bambu lab h2d
+Material: Pla + and ABS
+Layer height: 0.16
+Infill / walls: 55% / 4
 
 ### Assembly
 <!-- joints, tendons, what went wrong -->
@@ -106,23 +62,28 @@ Write this in your own words, with photos.
 ### Electronics
 ![](docs/images/wiring.jpg)
 
-## Results
 
-Add your own measurements here: sensor readings, what objects it can hold,
-failure cases. Plots from `logger.py` fit well.
+## Current Limitations
 
-## Known limitations
+- Finger position is open-loop. The servos have no feedback to the controller,
+  so tendon slack or stretch is not observed.
+- The tactile channel reports indentation magnitude per fingertip. It does not
+  resolve contact location or shear, and it drifts with temperature and
+  silicone ageing, hence the re-zero command.
+- One tendon per finger with spring return fixes extension force and gives no
+  independent joint control within a finger.
+- Contact and grip thresholds are tuned by hand per build, in ADC counts, not
+  calibrated to physical units.
 
-- Sensor output is in ADC counts above baseline, not newtons, until calibrated.
-- The useful hall signal is only a few counts on the Mega's 10-bit ADC.
-- Hobby-servo position is open loop; firmware assumes the servo reaches the
-  commanded pulse.
-- One tendon per finger means no independent joint control.
-- Firmware has not been verified on hardware yet. Update this when it has.
+## Future Goles
 
-## License
+- Calibrate the Hall signal against a load cell to report force in newtons.
+- Add servo-side position or current sensing to close the loop on tendon
+  tension.
+- Use the five tactile channels for slip detection and in-hand adjustment
+  rather than contact-only logic.
+- Move to compliant or underactuated finger linkages so the mechanism adapts
+  to object shape passively.
 
-Code: MIT, see [LICENSE](LICENSE). Printed parts are not included; see
-[cad/README.md](cad/README.md).
 
-Inspired by InMoov.
+
