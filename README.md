@@ -52,14 +52,26 @@ Print settings i used:
 ![](docs/images/assembly_finger2.jpg)
 ![](docs/images/assembly_palm.png)
 
+
 ### Fingertip sensors
 <!-- molding the silicone, magnet orientation, sensor soldering -->
 ![](docs/images/fingertip_sensor.png)
 
-### Fixing Servos
+- Each fingertip uses an AH3503 Hall-effect sensor and a small magnet.
+- When the fingertip touches an object, the silicone cap deforms and changes the magnet-to-sensor distance.
+- This changes the magnetic field detected by the Hall sensor.
+- The sensor produces an analog output that is read by the controller.
+- A threshold is used to detect contact and stop further finger closing.
+
+### Assembling Servos
 
 ![](docs/images/tendons_spool.jpg)
 
+- Mounted five servo motors inside the palm.
+- Routed braided-line tendons through each finger.
+- Connected each tendon to its respective servo for finger movement.
+- Installed Hall-effect sensors and magnets inside the silicone fingertip caps.
+- Completed the wiring and tested individual finger movements.
 
 ## Current Limitations
 
