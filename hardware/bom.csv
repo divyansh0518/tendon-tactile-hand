@@ -1,0 +1,19 @@
+item,qty,notes
+Arduino Mega 2560,1,Real-time loop: servos via I2C + hall sensors on A0-A4
+Raspberry Pi 4B,1,Host: logging / scripts over USB serial
+PCA9685 16-ch servo driver,1,I2C 0x40; Mega SDA=20 SCL=21
+Digital servo 20 kg.cm,5,One per finger. Check horn spline vs the printed pulley
+Hall sensor AH3503,5,Linear analog; one per fingertip (as in InMoov i2)
+Neodymium disc magnet 2.5 x 1 mm,5,South pole towards the sensor (check with a compass)
+Ribbon cable 16 wire thin and flexible,~1 m,3 wires per finger to the sensors
+Braided fishing line 0.8 mm (200 lb),~3 m,Tendons
+PTFE tube ID 1.5 mm / OD 2.5 mm,~2 m,Tendon sheaths: thumb 335 / index 300 / middle 300 / ring 300 / pinky 360 mm
+Extension spring 4.8 x 44.5 mm,5,Finger return
+Two-part silicone (Ecoflex 00-10 or similar),1 kit,Molded fingertips
+Screws M3 x 16 (countersunk),25+,See InMoov i2 BOM
+Screws M3 x 4 / M3 x 12 / M1.5 x 4,5 / 1 / 5,See InMoov i2 BOM
+Electrolytic capacitor 1000 uF,1,Across the servo supply near the PCA9685
+Power supply for servos,1,Rated for 5 servos at stall; check the servo datasheet for voltage and current
+Raspberry Pi power supply 5 V 3 A,1,Separate from the servo supply
+USB A-B cable,1,Pi to Mega
+PLA / PETG filament,~1 kg,Printed parts - see cad/README.md

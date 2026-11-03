@@ -1,0 +1,17 @@
+[project]
+name = "tactilehand"
+version = "0.1.0"
+description = "Host-side control and logging for the tendon-driven tactile hand"
+requires-python = ">=3.9"
+dependencies = ["pyserial>=3.5"]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.5", "numpy>=1.21"]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["tactilehand"]
