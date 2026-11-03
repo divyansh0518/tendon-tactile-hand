@@ -33,10 +33,10 @@ or the Pi.
 
 ## Build log
 
-Write this in your own words, with photos.
 
 ### Printing
 <!-- what you printed, settings, problems -->
+![](docs/images/printing_03.jpg)
 ![](docs/images/printing_01.jpg)
 
 Parts used (i2 hand, one hand)
@@ -52,15 +52,16 @@ Infill / walls: 55% / 4
 
 ### Assembly
 <!-- joints, tendons, what went wrong -->
-![](docs/images/assembly_finger.jpg)
+![](docs/images/assembly_finger2.jpg)
 ![](docs/images/assembly_palm.jpg)
 
 ### Fingertip sensors
 <!-- molding the silicone, magnet orientation, sensor soldering -->
 ![](docs/images/fingertip_sensor.jpg)
 
-### Electronics
-![](docs/images/wiring.jpg)
+### Fixing Servos
+
+![](docs/images/tendons_spool.jpg)
 
 
 ## Current Limitations
