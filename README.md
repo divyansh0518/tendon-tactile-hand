@@ -1,114 +1,128 @@
-# Tactile-Sensing Tendon-Driven Robotic Hand
+# Tendon-driven tactile hand
 
-A five-finger anthropomorphic hand with tendon-driven fingers, a motorised
-wrist, and magnet-and-Hall-effect tactile fingertips. The firmware closes each
-finger until it feels the object, then regulates grip from the tactile signal, inspired by inmoov hand.
+A 3D-printed tendon-driven hand with a hall-effect touch sensor in every
+fingertip. Each finger is pulled by one 20 kg.cm digital servo through a
+braided-line tendon, and the fingertip sensors let the hand stop closing as soon
+as it touches something instead of stalling the servo against the object.
 
-<!-- Replace with your own media -->
-![Hand](media/hand.jpg)
+<!-- Replace with your own photo -->
+![Prototype](docs/images/prototype_final.jpg)
 
-## Highlights
-
-- 6 (20kg/cm) torque 300 deg servos: independent actuation of all five fingers plus
-  wrist rotation.
-- Tendon transmission: braided 200 lb line through PTFE guides, with
-  spring-assisted passive extension (one actuator per finger, no antagonist
-  line).
-- Tactile fingertips: AH3503 Hall sensors under magnets embedded in molded
-  Ecoflex silicone, giving an analog contact signal per finger.
-- Tactile-driven grasping: per-finger close-until-contact, then grip regulation
-  and slip recovery, all on a 100 Hz loop.
 
 ## How it works
 
-```
- host (hand_console.py / plot_tactile.py)
-        |  USB serial, 115200 baud
-        v
- +----------------------------------------------------------+
- |  MCU                                                     |
- |   command parser --> Hand                                |
- |                       |-- Finger x5  (slew-limited servo)|--> tendons
- |                       |-- Wrist      (slew-limited servo)|--> wrist
- |                       '-- TactileSensor x5                |<-- AH3503
- |                            oversample -> EMA -> baseline |
- |                            -> hysteresis contact flag    |
- +----------------------------------------------------------+
-```
+- Arduino Mega 2560 runs the control loop: PCA9685 over I2C for the five
+  servos, five analog hall sensors on A0-A4.
+- Raspberry Pi 4B talks to the Mega over USB serial for control, logging and
+  experiments.
+- Each fingertip is a molded silicone cap with a small magnet over an AH3503
+  linear hall sensor. Pressing the tip moves the magnet closer and shifts the
+  sensor output.
+- Firmware takes a baseline, filters the readings, detects contact with a
+  hysteresis band, and while closing it holds a finger in place once its
+  reading passes a configurable limit. Opening is never blocked.
 
-### Tactile sensing
+## Hardware
 
-Each fingertip is a magnet cast into Ecoflex, sitting above an AH3503. When
-the tip is pressed, the silicone deforms, the magnet moves relative to the
-sensor, and the analog output shifts. The firmware zeroes against an unloaded
-baseline, oversamples (8x), applies an exponential filter, and tracks the
-magnitude of the deviation. A hysteresis band (`CONTACT_ON` / `CONTACT_OFF`)
-turns that into a stable contact flag.
+Parts: [hardware/bom.csv](hardware/bom.csv). Wiring: [docs/wiring.md](docs/wiring.md).
+Printed parts: [cad/README.md](cad/README.md). Assembly: [docs/assembly.md](docs/assembly.md).
 
-### Grasp control
+Servos get their own supply with a common ground. Do not run them from the Mega
+or the Pi.
 
-Every finger runs its own small state machine:
+## Build and flash
 
-| State | Behaviour |
-|---|---|
-| `FREE` | position commanded directly (poses, `f` command) |
-| `CLOSING` | flex at a limited speed until the fingertip reports contact |
-| `HOLDING` | freeze at contact, then trim tendon travel so the tactile level tracks a set-point |
-
-Tendon travel sets line tension through the servo and return spring, so a
-proportional term on tactile error regulates grip without any force sensing at
-the actuator. If contact is lost while holding (slip, or the object moves
-away), the finger drops back to `CLOSING` and re-engages. Fingers act
-independently, so each one settles on the contact geometry it actually meets.
-
-All motion is slew-limited per state, which keeps servo stalls and tendon
-shock loads down.
-
-## Repository layout
-
-```
-firmware/tendon_hand/
-  tendon_hand.ino    serial command interface, scheduler, telemetry
-  Config.h           pins, servo calibration, thresholds, gains, poses
-  TactileSensor.h    baseline, filtering, contact detection
-  Actuators.h        slew-limited finger and wrist servos
-  Hand.h             grasp state machine and hand-level commands
-tools/
-  hand_console.py    interactive serial console + CSV logging
-  plot_tactile.py    offline or live plots of travel and tactile signal
-docs/
-  hardware.md        BOM, wiring, mechanical notes
-  calibration.md     servo end-stops, tactile baseline, thresholds
-media/               photos, video stills, plots
+```bash
+cd firmware
+pio run -e mega -t upload
+pio device monitor
 ```
 
+Before first use set the servo travel for each finger and look at your sensor
+readings (see [docs/tuning.md](docs/tuning.md)). The defaults are deliberately
+conservative guesses, not tested values.
 
-## Limitations
+## Python (on the Pi or a PC)
 
-- Finger position is open-loop. The servos have no feedback to the controller,
-  so tendon slack or stretch is not observed.
-- The tactile channel reports indentation magnitude per fingertip. It does not
-  resolve contact location or shear, and it drifts with temperature and
-  silicone ageing, hence the re-zero command.
-- One tendon per finger with spring return fixes extension force and gives no
-  independent joint control within a finger.
-- Contact and grip thresholds are tuned by hand per build, in ADC counts, not
-  calibrated to physical units.
+```bash
+cd software
+pip install -e .[plot]
 
-## Future plans
+python examples/grasp_demo.py /dev/ttyACM0       # COM3 on Windows
+python examples/live_plot.py  /dev/ttyACM0
+python examples/logger.py     /dev/ttyACM0 -t 20
+python examples/calibrate.py  /dev/ttyACM0 index
+```
 
-- Calibrate the Hall signal against a load cell to report force in newtons.
-- Add servo-side position or current sensing to close the loop on tendon
-  tension.
-- Use the five tactile channels for slip detection and in-hand adjustment
-  rather than contact-only logic.
-- Move to compliant or underactuated finger linkages so the mechanism adapts
-  to object shape passively.
+Pi-specific setup: [docs/raspberry_pi.md](docs/raspberry_pi.md).
 
-## Author
+```python
+from tactilehand import Hand
 
-Divyansh Rahangdale
+with Hand("/dev/ttyACM0") as hand:
+    hand.zero_tactile()
+    hand.set_press_limit(8)
+    hand.grasp()
+```
+
+## Serial protocol
+
+115200 baud, newline-terminated ASCII, commands are case-insensitive.
+
+| Command | Meaning |
+|---------|---------|
+| `P p0 p1 p2 p3 p4` | Target position per finger, 0 (open) to 100 (closed) |
+| `F i pct` | Target for a single finger |
+| `OPEN` / `GRASP` | All fingers to 0 / 100 (press-limited) |
+| `LIM n` | Press limit, ADC counts above baseline |
+| `ZERO` | Re-zero hall baselines (nothing touching the fingertips) |
+| `STREAM 0\|1` | Telemetry on/off |
+
+Replies are `OK` or `ERR <reason>`. Telemetry at 25 Hz:
+
+```
+T,<ms>,<pos x5>,<press x5>,<contact bitmask>
+```
+
+Finger order: thumb, index, middle, ring, pinky.
+
+## Build log
+
+Write this in your own words, with photos.
+
+### Printing
+<!-- what you printed, settings, problems -->
+![](docs/images/printing_01.jpg)
+
+### Assembly
+<!-- joints, tendons, what went wrong -->
+![](docs/images/assembly_finger.jpg)
+![](docs/images/assembly_palm.jpg)
+
+### Fingertip sensors
+<!-- molding the silicone, magnet orientation, sensor soldering -->
+![](docs/images/fingertip_sensor.jpg)
+
+### Electronics
+![](docs/images/wiring.jpg)
+
+## Results
+
+Add your own measurements here: sensor readings, what objects it can hold,
+failure cases. Plots from `logger.py` fit well.
+
+## Known limitations
+
+- Sensor output is in ADC counts above baseline, not newtons, until calibrated.
+- The useful hall signal is only a few counts on the Mega's 10-bit ADC.
+- Hobby-servo position is open loop; firmware assumes the servo reaches the
+  commanded pulse.
+- One tendon per finger means no independent joint control.
+- Firmware has not been verified on hardware yet. Update this when it has.
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+Code: MIT, see [LICENSE](LICENSE). Printed parts are not included; see
+[cad/README.md](cad/README.md).
+
+Inspired by InMoov.
