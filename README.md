@@ -26,6 +26,7 @@ as it touches something instead of stalling the servo against the object.
 
 Parts: [hardware/bom.csv](hardware/bom.csv).
 Assembly: [docs/assembly.md](docs/assembly.md).
+Wiring: [docs/wiring.md](docs/wiring.md).
 
 
 ## Build log
