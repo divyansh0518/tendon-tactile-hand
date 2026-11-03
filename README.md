@@ -6,7 +6,7 @@ braided-line tendon, and the fingertip sensors let the hand stop closing as soon
 as it touches something instead of stalling the servo against the object.
 
 <!-- Replace with your own photo -->
-![Prototype](docs/images/prototype_final.jpg)
+![Prototype](docs/images/prototype_final.jpeg)
 
 
 ## How it works
