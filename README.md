@@ -53,11 +53,11 @@ Infill / walls: 55% / 4
 ### Assembly
 <!-- joints, tendons, what went wrong -->
 ![](docs/images/assembly_finger2.jpg)
-![](docs/images/assembly_palm.jpg)
+![](docs/images/assembly_palm.png)
 
 ### Fingertip sensors
 <!-- molding the silicone, magnet orientation, sensor soldering -->
-![](docs/images/fingertip_sensor.jpg)
+![](docs/images/fingertip_sensor.png)
 
 ### Fixing Servos
 
