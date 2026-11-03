@@ -2,16 +2,14 @@
 
 A five-finger anthropomorphic hand with tendon-driven fingers, a motorised
 wrist, and magnet-and-Hall-effect tactile fingertips. The firmware closes each
-finger until it feels the object, then regulates grip from the tactile signal.
+finger until it feels the object, then regulates grip from the tactile signal, inspired by inmoov hand.
 
 <!-- Replace with your own media -->
 ![Hand](media/hand.jpg)
 
-**Video:** _add link here_
-
 ## Highlights
 
-- 6 high-torque 300 deg servos: independent actuation of all five fingers plus
+- 6 (20kg/cm) torque 300 deg servos: independent actuation of all five fingers plus
   wrist rotation.
 - Tendon transmission: braided 200 lb line through PTFE guides, with
   spring-assisted passive extension (one actuator per finger, no antagonist
@@ -84,43 +82,6 @@ docs/
 media/               photos, video stills, plots
 ```
 
-## Getting started
-
-**Firmware.** Open `firmware/tendon_hand/tendon_hand.ino` in the Arduino IDE
-(the `Servo` library ships with it), select your board, and upload. Keep the
-hand open and unloaded at power-up, since the tactile baseline is zeroed
-during start-up.
-
-**Host tools.**
-
-```bash
-pip install -r requirements.txt
-python tools/hand_console.py --port /dev/ttyACM0 --log session.csv
-```
-
-Calibrate first: see [docs/calibration.md](docs/calibration.md). The default
-servo pulse ranges in `Config.h` are deliberately conservative.
-
-## Commands
-
-| Command | Effect |
-|---|---|
-| `open` | extend all fingers |
-| `grasp [level]` | tactile close on all fingers, optional grip set-point (ADC counts) |
-| `pose <name>` | `open`, `fist`, `point`, `peace`, `thumbsup`, `pinch` |
-| `f <0-4> <0..1>` | one finger to a normalised travel (0 extended, 1 flexed) |
-| `w <deg>` | wrist angle, clamped to the configured limits |
-| `level <counts>` | change the grip set-point |
-| `cal` | re-zero the tactile baseline (hand unloaded) |
-| `stream <0\|1>` | CSV telemetry at 50 Hz |
-| `status` | per-finger position, tactile level, mode |
-
-Telemetry columns: `t_ms`, `pos_*` (5), `wrist_deg`, `tac_*` (5), `contact_*` (5).
-
-```bash
-python tools/plot_tactile.py session.csv --out session.png
-python tools/plot_tactile.py --live /dev/ttyACM0
-```
 
 ## Limitations
 
@@ -134,7 +95,7 @@ python tools/plot_tactile.py --live /dev/ttyACM0
 - Contact and grip thresholds are tuned by hand per build, in ADC counts, not
   calibrated to physical units.
 
-## Where this could go
+## Future plans
 
 - Calibrate the Hall signal against a load cell to report force in newtons.
 - Add servo-side position or current sensing to close the loop on tendon
@@ -146,7 +107,7 @@ python tools/plot_tactile.py --live /dev/ttyACM0
 
 ## Author
 
-Divyansh, B.Tech Information Technology (AI & Robotics), MITS Gwalior.
+Divyansh Rahangdale
 
 ## License
 
