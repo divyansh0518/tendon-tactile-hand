@@ -1,9 +1,4 @@
-# Assembly notes
-
-Mechanical assembly follows the InMoov i2 hand guide (https://inmoov.fr/hand-i2/).
-This page only records what is specific to this build.
-
-## Mechanism (as in i2)
+## Mechanism
 
 - One braided-line tendon per finger on the palm side, running through a PTFE
   sheath from the finger to the servo pulley.
@@ -15,11 +10,10 @@ This page only records what is specific to this build.
 
 ## Differences from the reference build
 
-Write your own list. Examples of things worth recording:
 
 - Servos: 20 kg.cm digital servos instead of the servo InMoov lists, and what
   you changed so the pulley fits the horn.
-- Wrist: left out / included.
+- Wrist: Included (1-DOF)
 - Control: Arduino Mega + PCA9685 driven by this firmware, instead of the
   InMoov NervoBoard + MyRobotLab.
 
@@ -35,6 +29,5 @@ Write your own list. Examples of things worth recording:
 4. Check the reading direction with `live_plot.py`. If pressing the tip makes
    the value go down, set `HALL_SIGN` to -1 in `config.h`.
 
-## Photos
 
-Add photos under `docs/images/` and link them from the README build log.
+Assembly notes: Mechanical assembly follows the InMoov i2 hand guide (https://inmoov.fr/hand-i2/).
